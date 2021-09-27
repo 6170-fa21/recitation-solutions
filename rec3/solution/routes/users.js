@@ -8,7 +8,7 @@ const router = express.Router();
  * @name POST /api/session
  */
 router.post('/', (req, res) => {
-  if (req.session.username == null) {
+  if (req.session.username === null) {
     if (req.body.username.length === 0) {
       res.status(400).json({ message: 'The user name must be at least 1 character.' });
     } else {
