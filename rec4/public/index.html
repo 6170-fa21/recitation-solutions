@@ -162,18 +162,14 @@
         },
         showResponse(axiosResponse) {
           // Get the full response from axios
-          console.log("FUCK THIS SHIT ", axiosResponse);
           const fullResponse = axiosResponse.response === undefined 
                                ? axiosResponse : axiosResponse.response;
-          
-          console.log("YO WHAT THE FUCK: ", fullResponse);
           // Summarize the response
           const summarizedResponse = {
             data: fullResponse.data,
             status: fullResponse.status,
             statusText: fullResponse.statusText,
           };
-
           // Set the reactive data variable response to a nicely formatted response
           this.response = JSON.stringify(summarizedResponse, null, 4);
         },
