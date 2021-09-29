@@ -1,0 +1,213 @@
+<html>
+
+<head>
+  <title>URL Shortener</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <!-- <script src="/javascripts/services.js"></script> -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <header>
+      <h1>URL Shortener</h1>
+    </header>
+
+    <main class="two-col">
+      <section id="operations-container">
+        <h2>Operations:</h2>
+        <div class="scrollbox">
+
+          <form id="add-one" v-on:submit.prevent="createShortUrl">
+            <h3>Create Short URL</h3>
+            <div>
+              <label for="name">Short Name:</label>
+              <input id="name" name="name" v-model="shortUrlFormData.shortName">
+            </div>
+            <div>
+              <label for="url">URL:</label>
+              <input id="url" name="url" v-model="shortUrlFormData.shortUrl">
+            </div>
+            <input type="submit" value="Shorten URL">
+          </form>
+
+
+          <form id="list-all">
+            <h3>List All Short URLs</h3>
+            <input 
+              type="submit"
+              value="List Short URLs"
+              v-on:click.prevent="listShortUrls">
+          </form>
+
+          <form id="update-one" v-on:submit.prevent="updateShortUrl">
+            <h3>Update Short URL</h3>
+            <div>
+              <label for="name">Short Name:</label>
+              <input id="name" name="name" v-model="shortUrlFormData.shortName">
+            </div>
+            <div>
+              <label for="url">New URL:</label>
+              <input id="url" name="url" v-model="shortUrlFormData.shortUrl">
+            </div>
+            <input type="submit" value="Update Short URL">
+          </form>
+
+          <form v-if="signedIn" id="delete-one" v-on:submit.prevent="deleteShortUrl">
+            <h3>Delete Short URL</h3>
+            <div>
+              <label for="name">Short Name:</label>
+              <input id="name" name="name" v-model="shortUrlFormData.shortName">
+            </div>
+            <input type="submit" value="Delete Short URL">
+          </form>
+
+          <form v-if="signedIn === false" id="sign-in" v-on:submit.prevent="signIn">
+            <h3>Sign In</h3>
+            <div>
+              <label for="username">Username:</label>
+              <input id="username" name="username" v-model="username">
+            </div>
+            <input type="submit" value="Sign In">
+          </form>
+
+          <form v-if="signedIn" id="sign-out" v-on:submit.prevent="signOut">
+            <h3>Sign Out</h3>
+            <input type="submit" value="Sign Out">
+          </form>
+
+        </div>
+
+      </section>
+      <section>
+        <h2>Response:</h2>
+        <div class="scrollbox">
+          <pre id="response" class="teletype">{{response}}</pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        response: "",
+        shortUrlFormData: {
+          shortName: "",
+          shorUrl: "",
+        },
+        // state variable for whether or not we are signed in
+        signedIn: false,
+        username: "",
+      },
+      computed: {
+      },
+      methods: {
+        listShortUrls() {
+          // Try fetching all shorts stored on the server and show the response
+          axios
+            .get(`/api/shorts`)
+            .then(this.showResponse)
+            .catch(this.showResponse)
+        },
+        createShortUrl() {
+          // First some frontend validation -- no empty short name or url
+          if (!this.shortUrlFormData.shortName || !this.shortUrlFormData.shortUrl) {
+            this.response = "error please fix, you input an empty short name or an empty short url";
+            return;
+          }
+  
+
+          // Then try creating this new short on the server and show the response
+          axios
+            .post(`/api/shorts`, {
+              name: this.shortUrlFormData.shortName,
+              url: this.shortUrlFormData.shortUrl,
+            })
+            .then(this.showResponse)
+            .catch(this.showResponse)
+            .finally(this.cleanFormData);
+        },
+        updateShortUrl() {
+          if (!this.shortUrlFormData.shortName || !this.shortUrlFormData.shortUrl) {
+            this.response = "error please fix, you input an empty short name or an empty short url";
+            return;
+          }
+          axios
+            .put(`/api/shorts/${this.shortUrlFormData.shortName}`, {
+              url: this.shortUrlFormData.shortUrl,
+            })
+            .then(this.showResponse)
+            .catch(this.showResponse)
+            .finally(this.cleanFormData);
+        },
+        deleteShortUrl() {
+          if (!this.shortUrlFormData.shortName) {
+            this.response = "error please fix, you input an empty short name can't delete :/";
+            return;
+          }
+          axios
+            .delete(`/api/shorts/${this.shortUrlFormData.shortName}`)
+            .then(this.showResponse)
+            .catch(this.showResponse)
+            .finally(this.cleanFormData);
+        },
+        cleanFormData() {
+          // Empty out the create short url form's data
+          this.shortUrlFormData.shortName = "";
+          this.shortUrlFormData.shortUrl = "";
+        },
+        showResponse(axiosResponse) {
+          // Get the full response from axios
+          console.log("FUCK THIS SHIT ", axiosResponse);
+          const fullResponse = axiosResponse.response === undefined 
+                               ? axiosResponse : axiosResponse.response;
+          
+          console.log("YO WHAT THE FUCK: ", fullResponse);
+          // Summarize the response
+          const summarizedResponse = {
+            data: fullResponse.data,
+            status: fullResponse.status,
+            statusText: fullResponse.statusText,
+          };
+
+          // Set the reactive data variable response to a nicely formatted response
+          this.response = JSON.stringify(summarizedResponse, null, 4);
+        },
+        signOut() {
+          axios
+            .delete(`/api/session`)
+              .then(this.showResponse)
+              .then(() => {
+                this.signedIn = false;
+                this.username = "";
+              })
+              .catch(this.showResponse);
+        },
+        signIn() {
+          if (!this.username) {
+            this.response = "Please choose a non empty username";
+            return;
+          } else if (this.signedIn) {
+            this.response = `User ${this.username} is already signed in`;
+            return;
+          }
+          axios
+            .post(`/api/session`, {
+              username: this.username
+            })
+              .then(this.showResponse)
+              .then(() => {
+                this.signedIn = true;
+              })
+              .catch(this.showResponse);
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
