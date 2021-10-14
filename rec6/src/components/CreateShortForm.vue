@@ -39,7 +39,8 @@ export default {
       errors: [],
       success: "",
       shortName: "",
-      url: ""
+      url: "",
+      intervalID: null
     };
   },
 
@@ -84,7 +85,10 @@ export default {
     },
 
     clearMessages: function() {
-      setInterval(() => {
+      if (this.intervalID) {
+        clearInterval(this.intervalID);
+      }
+      this.intervalID = setInterval(() => {
         this.errors = [];
         this.success = "";
       }, 5000);
