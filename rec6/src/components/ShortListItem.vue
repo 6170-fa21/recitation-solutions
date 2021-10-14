@@ -3,7 +3,7 @@
   <div :class="'short-container'">
     <div class="short-name"> {{ short.name }}</div>
     <p>Creator ID: {{ creatorIdentity }}</p>
-    <p>Number of times visited: {{ visitCount }}</p>
+    <!-- TODO: implement showing visitCount for short -->
     <p>Short URL: <a target="_blank" v-bind:href=" 'http://localhost:3000/' + short.name" v-on:click="incrementShortCount">
       http://localhost:3000/{{short.name}}
     </a> </p>
@@ -41,7 +41,9 @@ export default {
       return this.short.creator ? this.short.creator : "anonymous";
     },
     visitCount: function() {
-      return this.short.count;
+      // TODO: implement me
+      return 0;
+      // return this.short.count;
     }
   },
 
