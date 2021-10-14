@@ -1,6 +1,6 @@
 <template>
   <!-- TODO: use 'short-container-popular' : 'short-container' CSS classes to delineate popular shorts -->
-  <div>
+  <div :class="'short-container'">
     <div class="short-name"> {{ short.name }}</div>
     <p>Creator ID: {{ creatorIdentity }}</p>
     <p>Number of times visited: {{ visitCount }}</p>
