@@ -13,6 +13,7 @@
 
       <div class="shorts-container">  
         <div v-if="shorts.length">
+          <!-- TODO: pass props to popular shorts -->
           <ShortListItem
             v-for="short in shorts.slice(0, 3)"
             v-bind:key="short.id"
