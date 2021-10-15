@@ -1,6 +1,5 @@
 <template>
-  <!-- TODO: use 'short-container-popular' : 'short-container' CSS classes to delineate popular shorts -->
-  <div :class="'short-container'">
+  <div :class="popular ? 'short-container-popular' : 'short-container'">
     <div class="short-name"> {{ short.name }}</div>
     <p>Creator ID: {{ creatorIdentity }}</p>
     <p>Number of times visited: {{ visitCount }}</p>
@@ -27,7 +26,7 @@ export default {
 
   props: {
     short: Object,
-    // TODO: create a popular prop
+    popular: Boolean
   },
 
   data() {
@@ -73,7 +72,15 @@ export default {
     },
 
     incrementShortCount: function() {
-      // TODO: implement incrementing short API call here
+      const body = { url: this.url, isCount: true};
+      axios
+        .put(`/api/shorts/${this.short.name}`, body)
+        .then(() => {
+          eventBus.$emit("increment-short-success", this.short);
+        })
+        .catch(() => {
+          eventBus.$emit("increment-short-error", this.short);
+        });
     }
   }
 };

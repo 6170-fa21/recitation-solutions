@@ -14,9 +14,16 @@
       <div class="shorts-container">  
         <div v-if="shorts.length">
           <ShortListItem
-            v-for="short in shorts"
+            v-for="short in shorts.slice(0, 3)"
             v-bind:key="short.id"
             v-bind:short="short"
+            v-bind:popular="true"
+          />
+          <ShortListItem
+            v-for="short in shorts.slice(3)"
+            v-bind:key="short.id"
+            v-bind:short="short"
+            v-bind:popular="false"
           />
         </div>
         <div v-else>
@@ -99,7 +106,11 @@ export default {
         .then(response => {
           this.shorts = response.data;
         })
-        // TODO: implement short sorting
+        .then(() => {
+          this.shorts = this.shorts.sort(
+            (a, b) => {return b["count"] - a["count"];}
+          );
+        })
     },
 
     clearMessages: function() {

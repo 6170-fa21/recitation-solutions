@@ -41,8 +41,9 @@ router.post('/', [validateThat.shortNameDoesNotAlreadyExist], (req, res) => {
  * @throws {404} - if short does not exist
  */
 router.put('/:name?', [validateThat.shortNameExists], (req, res) => {
-  // TODO: increment here
-  const short = Shorts.updateOne(req.params.name, req.body.url);
+  const short = (req.body.isCount) 
+    ? Shorts.incrementOne(req.params.name) 
+    : Shorts.updateOne(req.params.name, req.body.url);
   res.status(200).json(short).end();
 });
 

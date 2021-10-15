@@ -51,7 +51,9 @@ class Shorts {
    * @returns {Short} - the newly updated short
    */
   static incrementOne(name) {
-    // TODO: implement incrementing code
+    let short = this.findOne(name);
+    short.count++;
+    return short;
   }
 
   /**
