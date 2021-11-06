@@ -1,6 +1,8 @@
 const express = require('express');
 
-const Shorts = require('../models/Shorts');
+const Short = require('../models/Short');
+const controller = require('./shorts-controller');
+
 const validateThat = require('./middleware');
 
 const router = express.Router();
@@ -12,10 +14,12 @@ const router = express.Router();
  * 
  * @return {Short[]} - list of all stored shorts
  */
- router.get('/', (req, res) => {
-  res.status(200).json(Shorts.findAll()).end();
-});
+router.get('/', (req, res) => {
+  const shorts = controller.getAll();
+  res.status(200).json(shorts).end();
+})
 
+//TODO: EDIT THESE TO USE SHORTS-CONTROLLER
 /**
  * Create a short.
  * 
@@ -27,7 +31,7 @@ const router = express.Router();
  * @throws {400} - if name is already taken
  */
 router.post('/', [validateThat.shortNameDoesNotAlreadyExist], (req, res) => {
-  const short = Shorts.addOne(req.body.name, req.body.url, req.session.username); 
+  const short = Short.addOne(req.body.name, req.body.url, req.session.username); 
   res.status(200).json(short).end();
 });
 
@@ -42,8 +46,8 @@ router.post('/', [validateThat.shortNameDoesNotAlreadyExist], (req, res) => {
  */
 router.put('/:name?', [validateThat.shortNameExists], (req, res) => {
   const short = (req.body.isCount) 
-    ? Shorts.incrementOne(req.params.name) 
-    : Shorts.updateOne(req.params.name, req.body.url);
+    ? Short.incrementOne(req.params.name) 
+    : Short.updateOne(req.params.name, req.body.url);
   res.status(200).json(short).end();
 });
 
@@ -61,8 +65,8 @@ router.delete(
     validateThat.userIsLoggedIn,
     validateThat.shortNameExists,
   ],
-  (req, res) => {    
-  const short = Shorts.deleteOne(req.params.name);
+  (req, res) => {
+  const short = Short.deleteOne(req.params.name);
   res.status(200).json(short).end();
 });
 
