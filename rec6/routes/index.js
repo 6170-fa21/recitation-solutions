@@ -1,6 +1,6 @@
 const express = require('express');
 
-const Shorts = require('../models/Shorts');
+const controller = require('./shorts-controller');
 
 const router = express.Router();
 
@@ -32,7 +32,7 @@ router.get(
     const shortName = req.params.name;
 
     // fetch short from DB and ensure it exists
-    const short = await Shorts.findOne(shortName);
+    const short = await controller.findOne(shortName);
     if (!short) {
       res.status(404).json({
         error: `Short URL ${shortName} not found.`,
@@ -42,8 +42,8 @@ router.get(
     
     // if the destination URL of the short is specified, 
     // then navigate to it by redirecting 
-    if (short.url) {
-      res.redirect(short.url);
+    if (short.short_original_url) {
+      res.redirect(short.short_original_url);
     } else {
       next();
     }

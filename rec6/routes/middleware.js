@@ -1,9 +1,9 @@
 
-const Shorts = require('../models/Shorts');
+const Short = require('../models/Short');
 
 // Checks that the short name in the request body does not already exist
 const shortNameDoesNotAlreadyExist = (req, res, next) => {
-  if (Shorts.findOne(req.body.name) !== undefined) {
+  if (Short.findOne(req.body.name) !== undefined) {
     res.status(400).json({
       error: `Short URL ${req.body.name} already exists.`,
     }).end();
@@ -14,7 +14,7 @@ const shortNameDoesNotAlreadyExist = (req, res, next) => {
 
 // Checks that the short name in the paramerters exists
 const shortNameExists = (req, res, next) => {
-  if (Shorts.findOne(req.params.name) === undefined) {
+  if (Short.findOne(req.params.name) === undefined) {
     res.status(404).json({
       error: `Short URL ${req.params.name} does not exist.`,
     }).end();

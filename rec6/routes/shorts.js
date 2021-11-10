@@ -1,6 +1,5 @@
 const express = require('express');
 
-const Short = require('../models/Short');
 const controller = require('./shorts-controller');
 
 const validateThat = require('./middleware');
@@ -14,12 +13,23 @@ const router = express.Router();
  * 
  * @return {Short[]} - list of all stored shorts
  */
-router.get('/', (req, res) => {
-  const shorts = controller.getAll();
+router.get('/', async (req, res) => {
+  const shorts = await controller.getAll();
   res.status(200).json(shorts).end();
 })
 
-//TODO: EDIT THESE TO USE SHORTS-CONTROLLER
+/**
+ * List all shorts by author
+ * 
+ * @name GET /api/shorts/:author
+ * 
+ * @return {Short[]} - list of all stored shorts
+ */
+ router.get('/shortsByAuthor/:author?', async (req, res) => {
+  const shorts = await controller.getByAuthor(req.params.author);
+  res.status(200).json(shorts).end();
+})
+
 /**
  * Create a short.
  * 
@@ -30,8 +40,8 @@ router.get('/', (req, res) => {
  * @return {Short} - the created short
  * @throws {400} - if name is already taken
  */
-router.post('/', [validateThat.shortNameDoesNotAlreadyExist], (req, res) => {
-  const short = Short.addOne(req.body.name, req.body.url, req.session.username); 
+router.post('/', [validateThat.shortNameDoesNotAlreadyExist], async (req, res) => {
+  const short = await controller.addOne(req.body.url, req.body.name, req.session.username); 
   res.status(200).json(short).end();
 });
 
@@ -44,10 +54,10 @@ router.post('/', [validateThat.shortNameDoesNotAlreadyExist], (req, res) => {
  * @return {Short} - the updated short
  * @throws {404} - if short does not exist
  */
-router.put('/:name?', [validateThat.shortNameExists], (req, res) => {
+router.put('/:name?', [validateThat.shortNameExists], async (req, res) => {
   const short = (req.body.isCount) 
-    ? Short.incrementOne(req.params.name) 
-    : Short.updateOne(req.params.name, req.body.url);
+    ? await controller.incrementOne(req.params.name) 
+    : await controller.updateOne(req.body.url, req.params.name);
   res.status(200).json(short).end();
 });
 
@@ -65,8 +75,8 @@ router.delete(
     validateThat.userIsLoggedIn,
     validateThat.shortNameExists,
   ],
-  (req, res) => {
-  const short = Short.deleteOne(req.params.name);
+  async (req, res) => {
+  const short = await controller.deleteOne(req.params.name);
   res.status(200).json(short).end();
 });
 

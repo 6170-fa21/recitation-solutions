@@ -1,15 +1,51 @@
 const Short = require('../models/Short');
+const User = require('../models/User');
 
-export async function getAll(){
-  const query = {};
-  const data = await Short.find(query);
+async function getAll(){
+  const data = await Short.find({});
   return data;
 }
 
-export async function addOne(url, name) {
+async function findOne(name){
+  try{
+    const short = await Short.find({short_name: name}); //We make sure that names are unique
+    return short;
+  } catch(err) {
+    return false;
+  }
+}
+
+async function getByAuthor(author){
+  try{
+    //get user id from user name
+    const user = await User.find({user_name: author});
+    const user_id = user._id;
+    const shorts = await Short.aggregate([
+      {$lookup:
+        {
+          from: 'Short',
+          localField: 'short_creator_id',
+          foreignField: '_id',
+          as: 'User'
+        }
+      },
+      {$match:
+        {
+          short_creator_id: user_id
+        }
+      }
+    ]);
+    return shorts;
+  } catch(err){
+    return false;
+  }
+}
+
+async function addOne(url, name, author_id) {
     const short = new Short({
         short_original_url: url,
         short_name: name,
+        short_creator_id: author_id//put user id here
     });
     try {
         await short.save();
@@ -19,11 +55,9 @@ export async function addOne(url, name) {
     }     
 } 
 
-//TODO: USE NAME INSTEAD OF ID
-
-export async function updateOne(short_id, new_url){
+async function updateOne(new_url, name){
   try{
-    const short = await Short.findById(short_id);
+    const short = await Short.find({short_name: name});
     short.short_original_url = new_url;
     await short.save();
     return short;
@@ -32,9 +66,9 @@ export async function updateOne(short_id, new_url){
   }
 }
 
-export async function incrementOne(short_id){
+async function incrementOne(name){
   try{
-    const short = await Short.findById(short_id);
+    const short = await Short.find({short_name: name});
     short.short_visit_count++;
     await short.save();
     return short;
@@ -44,3 +78,21 @@ export async function incrementOne(short_id){
 }
 
 //add deleteOne
+async function deleteOne(name){
+  try{
+    const short = await Short.deleteOne({short_name: name});
+    return short;
+  } catch(err) {
+    return false;
+  }
+}
+
+module.exports = Object.freeze({
+  getAll,
+  findOne,
+  getByAuthor,
+  addOne,
+  updateOne,
+  incrementOne,
+  deleteOne
+});
