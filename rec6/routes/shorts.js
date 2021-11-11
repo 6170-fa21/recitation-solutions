@@ -19,18 +19,6 @@ router.get('/', async (req, res) => {
 })
 
 /**
- * List all shorts by author
- * 
- * @name GET /api/shorts/:author
- * 
- * @return {Short[]} - list of all stored shorts
- */
- router.get('/shortsByAuthor/:author?', async (req, res) => {
-  const shorts = await controller.getByAuthor(req.params.author);
-  res.status(200).json(shorts).end();
-})
-
-/**
  * Create a short.
  * 
  * @name POST /api/shorts

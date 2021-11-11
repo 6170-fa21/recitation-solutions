@@ -1,6 +1,6 @@
 const express = require('express');
 
-const User = require("../models/User");
+const controller = require("./users-controller");
 
 const router = express.Router();
 
@@ -9,13 +9,16 @@ const router = express.Router();
  * 
  * @name POST /api/session
  */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   if (req.session.username === null || req.session.username === undefined) {
     if (req.body.username.length === 0) {
       res.status(400).json({ message: 'The user name must be at least 1 character.' }).end();
     } else {
       req.session.username = req.body.username;
-      console.log(req.session.username);
+      const existing = await controller.findOne(req.body.username);
+      if(existing !== []){
+        await controller.addOne(req.body.username);
+      }
       res.status(200).json({ username: req.session.username }).end();
     }
   } else {

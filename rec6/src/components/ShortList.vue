@@ -16,13 +16,13 @@
           <!-- TODO: pass props to popular shorts -->
           <ShortListItem
             v-for="short in shorts.slice(0, 3)"
-            v-bind:key="short.id"
+            v-bind:key="short._id"
             v-bind:short="short"
             v-bind:popular="true"
           />
           <ShortListItem
             v-for="short in shorts.slice(3)"
-            v-bind:key="short.id"
+            v-bind:key="short._id"
             v-bind:short="short"
             v-bind:popular="false"
           />
@@ -60,39 +60,39 @@ export default {
     });
 
     eventBus.$on("update-short-success", res => {
-      this.success = `Short name ${res.name} now resolves to ${
-        res.url
+      this.success = `Short name ${res.short_name} now resolves to ${
+        res.short_original_url
       }`;
       this.clearMessages();
       this.loadShorts();
     });
 
     eventBus.$on("increment-short-success", res => {
-      this.success = `Short name ${res.name} has been visited`;
+      this.success = `Short name ${res.short_name} has been visited`;
       this.clearMessages();
       this.loadShorts();
     })
 
     eventBus.$on("delete-short-success", res => {
-      this.success = `Short name ${res.name} has been deleted`;
+      this.success = `Short name ${res.short_name} has been deleted`;
       this.clearMessages();
       this.loadShorts();
     });
 
     eventBus.$on("update-short-error", res => {
-      this.error = `Error updating short ${res.name}`;
+      this.error = `Error updating short ${res.short_name}`;
       this.clearMessages();
       this.loadShorts();
     });
 
     eventBus.$on("delete-short-error", res => {
-      this.error = `Error deleting short ${res.name}`;
+      this.error = `Error deleting short ${res.short_name}`;
       this.clearMessages();
       this.loadShorts();
     });
 
     eventBus.$on("increment-short-error", res => {
-      this.error = `Error visiting short ${res.name}`;
+      this.error = `Error visiting short ${res.short_name}`;
       this.clearMessages();
     });
   },
@@ -109,7 +109,7 @@ export default {
         })
         .then(() => {
           this.shorts = this.shorts.sort(
-            (a, b) => {return b["count"] - a["count"];}
+            (a, b) => {return b["short_visit_count"] - a["short_visit_count"];}
           );
         })
     },
